@@ -16,10 +16,10 @@ from ..auth import (
     require_permission, require_role,
     Permission, UserRole
 )
-from ..rbac_service import rbac_service
-from ....core.logger import get_logger
-from ....core.config import settings
-from ....services.audit_service import audit_service, AuditAction
+from ...services.rbac_service import rbac_service
+from ...core.logger import get_logger
+from ...core.config import settings
+from ...services.audit_service import audit_service, AuditAction
 
 logger = get_logger("telegram.handlers.trades")
 

@@ -14,7 +14,12 @@ from ...core.logger import get_logger
 from ...core.enums import TimeFrame
 from ...analysis.smc_engine import SMCEngine
 from ...analysis.price_action_engine import PriceActionEngine
-from ...analysis.decision_engine import DecisionEngine, DecisionInput
+from ...analysis.decision_engine import (
+    DecisionEngine, DecisionInput,
+    SMCContext, PriceActionContext, SessionContext,
+    LiquidityContext, RiskContext, LicenseContext,
+    MarketTrend, DecisionDirection
+)
 
 logger = get_logger("api.analysis")
 router = APIRouter()
@@ -103,37 +108,59 @@ async def full_analysis(
             }
         )
 
+        # ساخت SMCContext
+        smc_context = SMCContext(
+            trend=smc_result.trend,
+            trend_score=smc_result.total_score,
+            structure_event=smc_result.details.get("structure", {}).get("last_event"),
+            structure_direction=smc_result.trend.value,
+            structure_level=smc_result.details.get("structure", {}).get("key_levels", {}).get("last_swing_high"),
+            liquidity_swept=smc_result.liquidity_swept,
+            liquidity_direction=smc_result.details.get("liquidity", {}).get("direction"),
+            premium_discount=smc_result.premium_discount,
+            order_blocks=smc_result.details.get("order_blocks", []),
+            fvgs=smc_result.details.get("fvgs", []),
+            swing_high=smc_result.details.get("structure", {}).get("key_levels", {}).get("last_swing_high"),
+            swing_low=smc_result.details.get("structure", {}).get("key_levels", {}).get("last_swing_low")
+        )
+
+        # ساخت PriceActionContext
+        pa_direction = DecisionDirection.BULLISH if pa_result.direction == "bullish" else (
+            DecisionDirection.BEARISH if pa_result.direction == "bearish" else DecisionDirection.NEUTRAL
+        )
+        pa_context = PriceActionContext(
+            direction=pa_direction,
+            direction_score=pa_result.total_score,
+            patterns=[{"name": p.pattern_name, "direction": p.direction, "score": p.score}
+                      for p in pa_result.patterns],
+            support_resistance=pa_result.details.get("support_resistance", {}),
+            candle_strength=pa_result.strength
+        )
+
+        # ساخت SessionContext
+        session_context = SessionContext(
+            killzone_active=smc_result.killzone_active,
+            killzone_name=smc_result.details.get("session", {}).get("killzone_name"),
+            session_score=smc_result.session_score,
+            session_overlap=False
+        )
+
+        # ساخت LiquidityContext
+        liquidity_context = LiquidityContext(
+            buy_side_liquidity=smc_result.details.get("liquidity", {}).get("available_buy_side", []),
+            sell_side_liquidity=smc_result.details.get("liquidity", {}).get("available_sell_side", []),
+            sweep_score=smc_result.details.get("liquidity", {}).get("score", 0)
+        )
+
         # ساخت DecisionInput
         decision_input = DecisionInput(
-            smc_score=smc_result.total_score,
-            smc_direction=smc_result.trend.value,
-            smc_details={
-                "last_event": smc_result.details.get("structure", {}).get("last_event"),
-                "liquidity_swept": smc_result.liquidity_swept,
-                "key_levels": smc_result.details.get("structure", {}).get("key_levels", {}),
-                "premium_discount": smc_result.premium_discount
-            },
-            price_action_score=pa_result.total_score,
-            price_action_direction=pa_result.direction,
-            price_action_details={
-                "patterns": [{"pattern_name": p.pattern_name, "direction": p.direction}
-                            for p in pa_result.patterns]
-            },
-            liquidity_score=smc_result.details.get("liquidity", {}).get("score", 0),
-            liquidity_details={
-                "liquidity_swept": smc_result.liquidity_swept,
-                "available_buy_side": smc_result.details.get("liquidity", {}).get("available_buy_side", []),
-                "available_sell_side": smc_result.details.get("liquidity", {}).get("available_sell_side", [])
-            },
-            mtf_score=0,  # نیاز به داده چند تایم‌فریم
-            mtf_alignment={},
-            session_score=smc_result.session_score,
-            session_details={
-                "killzone_active": smc_result.killzone_active,
-                "current_session": smc_result.details.get("session", {}).get("current_session")
-            },
-            volatility_score=0,
-            current_price=data.closes[-1] if data.closes else 0
+            symbol=request.symbol,
+            timeframe=request.timeframe,
+            current_price=data.closes[-1] if data.closes else 0,
+            smc_context=smc_context,
+            price_action_context=pa_context,
+            session_context=session_context,
+            liquidity_context=liquidity_context
         )
 
         # تصمیم‌گیری

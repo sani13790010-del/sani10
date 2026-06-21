@@ -12,9 +12,9 @@ import httpx
 from ..keyboards import get_reports_keyboard
 from ..utils import format_report_summary
 from ..auth import rate_limit, require_permission, Permission
-from ..rbac_service import rbac_service
-from ....core.logger import get_logger
-from ....core.config import settings
+from ...services.rbac_service import rbac_service
+from ...core.logger import get_logger
+from ...core.config import settings
 
 logger = get_logger("telegram.handlers.reports")
 

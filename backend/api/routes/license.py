@@ -10,9 +10,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
 
-from ..core.logger import get_logger
-from ..services.license_service import license_service
-from ..models.license import (
+from ...core.logger import get_logger
+from ...services.license_service import license_service
+from ...models.license import (
     LicenseValidateRequest,
     DeviceActivateRequest,
     LicenseValidationResult,
@@ -20,6 +20,7 @@ from ..models.license import (
     LicenseCreateRequest,
     LicenseExtendRequest,
 )
+from ...services import audit_service
 
 logger = get_logger("api.license")
 router = APIRouter()

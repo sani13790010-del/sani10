@@ -7,7 +7,8 @@
 
 import os
 from typing import List, Optional
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 from functools import lru_cache
 
 
@@ -117,10 +118,11 @@ class Settings(BaseSettings):
     # =====================================================
     CORS_ORIGINS: List[str] = Field(default_factory=lambda: ["*"])
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": True
+    }
 
 
 @lru_cache()

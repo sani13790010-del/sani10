@@ -16,9 +16,9 @@ from ..auth import (
     require_permission, require_role, rate_limit,
     Permission, UserRole
 )
-from ..rbac_service import rbac_service
-from ....core.logger import get_logger
-from ....services.audit_service import audit_service, AuditAction
+from ...services.rbac_service import rbac_service
+from ...core.logger import get_logger
+from ...services.audit_service import audit_service, AuditAction
 
 logger = get_logger("telegram.handlers.start")
 

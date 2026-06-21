@@ -15,7 +15,7 @@ from aiogram import types, Dispatcher
 from aiogram.filters import BaseFilter
 from aiogram.types import Message, CallbackQuery
 
-from ..telegram.rbac import (
+from .rbac import (
     Permission, UserRole, has_permission,
     COMMAND_PERMISSIONS, get_permission_denied_message,
     get_min_role_for_permission
@@ -216,7 +216,7 @@ def require_role(min_role: UserRole) -> Callable:
                 return
 
             # مقایسه سطح نقش
-            from ..telegram.rbac import get_role_level
+            from .rbac import get_role_level
             user_level = get_role_level(user_role)
             required_level = get_role_level(min_role)
 

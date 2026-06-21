@@ -60,3 +60,33 @@ class ValidationError(MT5TradingError):
     def __init__(self, message: str, field: str = "unknown"):
         super().__init__(message, "VALIDATION_ERROR")
         self.field = field
+
+
+class DatabaseError(MT5TradingError):
+    """خطای دیتابیس"""
+
+    def __init__(self, message: str, operation: str = "unknown"):
+        super().__init__(message, f"DATABASE_ERROR_{operation.upper()}")
+        self.operation = operation
+
+
+class RecordNotFoundError(MT5TradingError):
+    """خطای رکورد یافت نشد"""
+
+    def __init__(self, message: str, table: str = "unknown"):
+        super().__init__(message, "RECORD_NOT_FOUND")
+        self.table = table
+
+
+class LicenseExpiredError(LicenseError):
+    """خطای انقضای لایسنس"""
+
+    def __init__(self, message: str = "لایسنس منقضی شده است"):
+        super().__init__(message, "expired")
+
+
+class FeatureNotLicensedError(LicenseError):
+    """خطای دسترسی به ویژگی غیرمجاز"""
+
+    def __init__(self, message: str = "دسترسی به این ویژگی مجاز نیست"):
+        super().__init__(message, "feature_not_licensed")

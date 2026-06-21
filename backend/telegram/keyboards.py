@@ -70,16 +70,23 @@ def get_settings_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def get_trades_keyboard() -> InlineKeyboardMarkup:
+def get_trades_keyboard(full: bool = True) -> InlineKeyboardMarkup:
     """
     کیبورد معاملات
+
+    Args:
+        full: اگر True باشد، همه دکمه‌ها نمایش داده می‌شود
+              اگر False باشد، فقط مشاهده معاملات
     """
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(text="📋 معاملات باز", callback_data="trades_open"))
     builder.add(InlineKeyboardButton(text="📜 تاریخچه", callback_data="trades_history"))
-    builder.add(InlineKeyboardButton(text="❌ بستن همه", callback_data="trades_close_all"))
+
+    if full:
+        builder.add(InlineKeyboardButton(text="❌ بستن همه", callback_data="trades_close_all"))
+
     builder.add(InlineKeyboardButton(text="🔙 بازگشت", callback_data="back_main"))
-    builder.adjust(2, 2)
+    builder.adjust(2, 2 if full else 2)
     return builder.as_markup()
 
 
@@ -173,4 +180,16 @@ def get_pagination_keyboard(
     ))
 
     builder.adjust(3, 1)
+    return builder.as_markup()
+
+
+def get_back_keyboard() -> InlineKeyboardMarkup:
+    """
+    کیبورد بازگشت
+    """
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(
+        text="🔙 بازگشت",
+        callback_data="back_main"
+    ))
     return builder.as_markup()
